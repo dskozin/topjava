@@ -35,18 +35,18 @@ public class UserMealsUtil {
 
         //создать хэшлист, у которого ключом будет дата, значением - сколько каллорий
         HashMap<LocalDate,Integer> isExceed = new HashMap<>();
-        for(UserMeal userMeal : mealList){
+        mealList.forEach(userMeal -> {
             LocalDate thisUMD = userMeal.getDateTime().toLocalDate();
             isExceed.put(thisUMD, isExceed.containsKey(thisUMD) ? isExceed.get(thisUMD) + userMeal.getCalories()
                                                                 : userMeal.getCalories());
-        }
+        });
 
 
         //создать список еды
         List<UserMealWithExceed> reList = new ArrayList<UserMealWithExceed>();
 
         //перебрать массив если даты ок, добавить в список.
-        for(UserMeal uMeal:  mealList){
+        mealList.forEach(uMeal -> {
             if (uMeal.getDateTime().toLocalTime().isAfter(startTime)
                     && uMeal.getDateTime().toLocalTime().isBefore(endTime)){
 
@@ -58,7 +58,7 @@ public class UserMealsUtil {
                 reList.add(uMealWE);
 
             }
-        }
+        });
 
         return reList;
     }

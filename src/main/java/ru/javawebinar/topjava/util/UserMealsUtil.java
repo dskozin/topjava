@@ -3,11 +3,13 @@ package ru.javawebinar.topjava.util;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealWithExceed;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * GKislin
@@ -26,6 +28,10 @@ public class UserMealsUtil {
         for (UserMealWithExceed uML : getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12,0), 2000)){
             System.out.println(uML.getCalories() + " " + uML.getDateTime() + " " + uML.isExceed());
         }
+
+        for (UserMealWithExceed uML : getFilteredWithExceededWithStreamAPI(mealList, LocalTime.of(7, 0), LocalTime.of(12,0), 2000)){
+            System.out.println(uML.getCalories() + " " + uML.getDateTime() + " " + uML.isExceed());
+        }
 //        .toLocalDate();
 //        .toLocalTime();
     }
@@ -34,18 +40,17 @@ public class UserMealsUtil {
         // TODO return filtered list with correctly exceeded field
 
         //создать хэшлист, у которого ключом будет дата, значением - сколько каллорий
-        HashMap<LocalDate,Integer> isExceed = new HashMap<>();
+        Map<LocalDate,Integer> isExceed = new HashMap<>();
         mealList.forEach(userMeal -> {
             LocalDate thisUMD = userMeal.getDateTime().toLocalDate();
-            isExceed.put(thisUMD, isExceed.containsKey(thisUMD) ? isExceed.get(thisUMD) + userMeal.getCalories()
-                                                                : userMeal.getCalories());
+            isExceed.merge(thisUMD, userMeal.getCalories(), Math::addExact);
         });
 
 
         //создать список еды
         List<UserMealWithExceed> reList = new ArrayList<UserMealWithExceed>();
 
-        //перебрать массив если даты ок, добавить в список.
+        //перебрать массив если верямя ок, добавить в список.
         mealList.forEach(uMeal -> {
             if (uMeal.getDateTime().toLocalTime().isAfter(startTime)
                     && uMeal.getDateTime().toLocalTime().isBefore(endTime)){
@@ -63,13 +68,27 @@ public class UserMealsUtil {
         return reList;
     }
 
-//    Реализовать метод UserMealsUtil.getFilteredWithExceeded:
-//            -  должны возвращаться только записи между startTime и endTime
-//            -  поле UserMealWithExceed.exceed должно показывать,
-//                  превышает ли сумма калорий за весь день параметра метода caloriesPerDay
-//
-//    Т.е UserMealWithExceed - это запись одной еды, но поле exceeded будет одинаково для всех записей за этот день.
-//
-//            - Проверте результат выполнения ДЗ (можно проверить логику в http://topjava.herokuapp.com , список еды)
-//            - Оцените Time complexity вашего алгоритма, если он O(N*N)- попробуйте сделать O(N).
+    public static List<UserMealWithExceed>  getFilteredWithExceededWithStreamAPI(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+
+        //создать хэшлист, у которого ключом будет дата, значением - сколько каллорий
+        Map<LocalDate,Integer> isExceed = mealList.stream()
+                                                    .collect(Collectors.groupingBy(
+                                                                UserMeal::getLocalData,
+                                                                Collectors.summingInt(UserMeal::getCalories)
+                                                            ));
+
+        //создать список еды
+        List<UserMealWithExceed> reList = mealList.stream()
+                .filter(e -> e.getDateTime().toLocalTime().isAfter(startTime)
+                        && e.getDateTime().toLocalTime().isBefore(endTime))
+                .map(e -> new UserMealWithExceed(
+                            e.getDateTime(),
+                            e.getDescription(),
+                            e.getCalories(),
+                            isExceed.get(e.getLocalData()) > caloriesPerDay))
+                .collect(Collectors.toList());
+
+        return reList;
+    }
+
 }

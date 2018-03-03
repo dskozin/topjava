@@ -37,17 +37,15 @@ public class UserMealsUtil {
     public static List<UserMealWithExceed> getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
 
         //создать хэшлист, у которого ключом будет дата, значением - сколько каллорий
-        Map<LocalDate, Long> isExceed = new HashMap<>();
-
+        Map<LocalDate, Integer> isExceed = new HashMap<>();
         mealList.forEach(userMeal -> {
             LocalDate thisUMD = userMeal.getDateTime().toLocalDate();
-            isExceed.merge(thisUMD, (long) userMeal.getCalories(), Math::addExact);
+            isExceed.merge(thisUMD, userMeal.getCalories(), Integer::sum);
         });
 
 
         //создать список еды
         List<UserMealWithExceed> mealWithExceedArrayList = new ArrayList<UserMealWithExceed>();
-
         //перебрать массив если верямя ок, добавить в список.
         mealList.forEach(uMeal -> {
             if (TimeUtil.isBetween(uMeal.getDateTime().toLocalTime(), startTime, endTime)) {

@@ -75,21 +75,4 @@ public class MealServlet extends HttpServlet {
 
         response.sendRedirect("meals");
     }
-
-    @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        log.debug("Delete meal");
-        request.setCharacterEncoding("UTF-8");
-        Long id;
-
-        if (request.getParameter("id") == null) {
-            response.sendRedirect("meals");
-            return;
-        }
-
-        id = Long.parseLong(request.getParameter("id"));
-        STORAGE.delete(id);
-
-        response.sendRedirect("meals");
-    }
 }

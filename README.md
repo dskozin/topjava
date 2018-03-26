@@ -1,4 +1,4 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0593935704a24c789cbeecc14765d70f)]
+![Codacy Badge](https://api.codacy.com/project/badge/Grade/0593935704a24c789cbeecc14765d70f)
 
 Java Enterprise Online Project 
 ===============================
